@@ -1,7 +1,7 @@
-asyncws
+asyncwebsockets
 =======
 
-asyncws is a `curio`_ + `trio`_ compatible library for connecting and serving websockets.
+asyncwebsockets is a `curio`_ + `trio`_ compatible library for connecting and serving websockets.
 
 
 Installation
@@ -9,11 +9,11 @@ Installation
 
 To install the latest stable version::
 
-    $ pip install asyncws
+    $ pip install asyncwebsockets
 
 To install the latest development version::
 
-    $ pip install git+https://github.com/SunDwarf/asyncws.git#egg=asyncws
+    $ pip install git+https://github.com/SunDwarf/asyncwebsockets.git#egg=asyncwebsockets
 
 
 Basic Usage
@@ -22,7 +22,7 @@ Basic Usage
 .. code-block:: python
 
     import multio
-    from asyncws import open_websocket, Websocket
+    from asyncwebsockets import open_websocket, Websocket
 
     async def main():
         sock: Websocket = await connect_websocket("wss://echo.websocket.org")

@@ -7,15 +7,15 @@ if sys.version_info[0:2] < (3, 5):
     raise RuntimeError("This package requires Python 3.5+.")
 
 setup(
-    name="asyncws",
+    name="asyncwebsockets",
     use_scm_version={
         "version_scheme": "guess-next-dev",
         "local_scheme": "dirty-tag"
     },
     packages=[
-        "asyncws"
+        "asyncwebsockets"
     ],
-    url="https://github.com/SunDwarf/asyncws",
+    url="https://github.com/SunDwarf/asyncwebsockets",
     license="MIT",
     author="Laura Dickinson",
     author_email="l@veriny.tf",

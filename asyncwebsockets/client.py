@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import multio
 from wsproto.connection import WSConnection, ConnectionType
 
-from asyncws.common import Websocket
+from asyncwebsockets.common import Websocket
 
 
 async def connect_websocket(url: str = None, *,
