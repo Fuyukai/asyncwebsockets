@@ -41,6 +41,14 @@ class WebsocketBytesMessage(WebsocketMessage):
     TYPE = MessageType.BYTES
 
 
+class WebsocketUnusable(RuntimeError):
+    """
+    Exception that's raised when a websocket cannot be read or written to.
+
+    This is raised when the websocket is closed.
+    """
+
+
 class WebsocketClosed(Exception):
     """
     Exception that represents a websocket that's closed.
@@ -73,6 +81,7 @@ class Websocket(object):
         self.state = state
         self.sock = sock
 
+        self._ready = False
         self._messages = collections.deque()
         self._byte_buffer = BytesIO()
         self._string_buffer = StringIO()
@@ -95,7 +104,9 @@ class Websocket(object):
         # read open event
         msg = await self.next_message()
         if not isinstance(msg, events.ConnectionEstablished):
-            raise RuntimeError("Got unknown open event {}".format(msg))
+            raise WebsocketUnusable("Got unknown open event {}".format(msg))
+
+        self._ready = True
 
     async def next_message(self) -> WebsocketMessage:
         """
@@ -104,7 +115,7 @@ class Websocket(object):
         :return: A :class:`.WebsocketMessage` object that represents the message received.
         """
         if self.closed:
-            raise RuntimeError("Websocket is closed")
+            raise WebsocketUnusable("Websocket is closed")
 
         # if we can, pop off an event
         try:
@@ -176,7 +187,7 @@ class Websocket(object):
         :param data: The data to send. Either str or bytes.
         """
         if self.closed:
-            raise RuntimeError("Websocket is closed")
+            raise WebsocketUnusable("Websocket is closed")
 
         self.state.send_data(data, final=True)
         await self.sock.sendall(self.state.bytes_to_send())
