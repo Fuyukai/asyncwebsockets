@@ -203,4 +203,5 @@ class Websocket(object):
         to_send = self.state.bytes_to_send()
         await self.sock.sendall(to_send)
         await self.sock.close()
+        self.state.receive_bytes(None)
 
