@@ -128,7 +128,10 @@ class Websocket(object):
 
         while True:
             # read 8192 bytes off the sock
-            data = await self.sock.recv(8192)
+            try:
+                data = await self.sock.recv(8192)
+            except OSError as e:
+                raise WebsocketUnusuable("Read error") from e
             self.state.receive_bytes(data)
 
             need_data = False
