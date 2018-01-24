@@ -19,12 +19,6 @@ class MessageType(enum.Enum):
     BYTES = 1
 
 
-class WebsocketError(Exception):
-    """
-    Represents an error with the websocket.
-    """
-
-
 class WebsocketMessage:
     """
     Represents a message.
