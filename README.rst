@@ -19,17 +19,24 @@ To install the latest development version::
 Basic Usage
 -----------
 
-.. code-block:: python
+.. code-block:: python3
 
     import multio
-    from asyncwebsockets import open_websocket, Websocket
 
-    async def main():
-        sock: Websocket = await connect_websocket("wss://echo.websocket.org")
-        await sock.send_message("Hello, world!")
-        ev = await sock.next_message()
-        print(ev.data)  # "Hello, world!"
-        await sock.close(code=1000, reason="Goodbye")
+    from asyncwebsockets.client import connect_websocket
+    from asyncwebsockets.ws import WebsocketConnectionEstablished, WebsocketBytesMessage
+
+    async def test():
+        sock = await connect_websocket("wss://echo.websocket.org", reconnecting=False)
+        async for message in sock:
+            print("Event received", message)
+            if isinstance(message, WebsocketConnectionEstablished):
+                await sock.send_message(b"test")
+
+            elif isinstance(message, WebsocketBytesMessage):
+                print("Got response:", message.data)
+                await sock.close(code=1000, reason="Thank you!")
+
 
     multio.init("curio")
     multio.run(main)
