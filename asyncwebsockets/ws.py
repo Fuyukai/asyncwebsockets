@@ -116,13 +116,6 @@ class ClientWebsocket(object):
         buf_text = StringIO()
 
         while True:
-            if self.state.closed:
-                yield WebsocketClosed(events.ConnectionClosed(1006, reason="Closed internally"))
-
-                # if we closed somehow without noticing, we need to reconnect
-                if self._reconnecting:
-                    await self.open_connection()
-
             data = await self.sock.recv(4096)
             self.state.receive_bytes(data)
 
