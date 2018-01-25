@@ -119,6 +119,11 @@ class ClientWebsocket(object):
             data = await self.sock.recv(4096)
             self.state.receive_bytes(data)
 
+            # do ping/pongs if needed
+            to_send = self.state.bytes_to_send()
+            if to_send:
+                await self.sock.sendall(to_send)
+
             for event in self.state.events():
                 if isinstance(event, events.ConnectionEstablished):
                     self._ready = True
