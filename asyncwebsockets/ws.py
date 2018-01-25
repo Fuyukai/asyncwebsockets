@@ -1,8 +1,6 @@
 """
 Common code for both client and server.
 """
-import abc
-import enum
 from io import BytesIO, StringIO
 from typing import Tuple, Union
 
