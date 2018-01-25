@@ -73,5 +73,18 @@ A full listing of events that can be yielded from the websockets can be found he
 .. autoclass:: WebsocketConnectionEstablished
 .. autoclass:: WebsocketConnectionFailed
 
+Changelog
+=========
+
+0.2.0
+-----
+
+ - Redesign API significantly.
+
+0.1.0
+-----
+
+ - Initial release.
+
 
 .. _multio: https://github.com/theelous3/multio
