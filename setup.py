@@ -3,8 +3,8 @@ from pathlib import Path
 
 from setuptools import setup
 
-if sys.version_info[0:2] < (3, 5):
-    raise RuntimeError("This package requires Python 3.5+.")
+if sys.version_info[0:2] < (3, 6):
+    raise RuntimeError("This package requires Python 3.6+.")
 
 setup(
     name="asyncwebsockets",
@@ -27,8 +27,8 @@ setup(
     ],
     install_requires=[
         "multio",
-        "wsproto>=0.10.0"
+        "wsproto>=0.11.0"
     ],
     extras_require={},
-    python_requires=">=3.5.2",
+    python_requires=">=3.6",
 )
