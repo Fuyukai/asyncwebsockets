@@ -173,15 +173,21 @@ class ClientWebsocket(object):
         self.state.send_data(data, final=True)
         return await self.sock.sendall(self.state.bytes_to_send())
 
-    async def close(self, *, code: int = 1000, reason: str = "No reason"):
+    async def close(self, *, code: int = 1000, reason: str = "No reason",
+                    allow_reconnects: bool = False):
         """
         Closes the websocket.
 
         :param code: The close code to use.
         :param reason: The close reason to use.
+
+        If the websocket is marked as reconnecting:
+
+        :param allow_reconnects: If the websocket can reconnect after this close.
         """
-        # do NOT reconnect if we close explicitly
-        self._reconnecting = False
+        # do NOT reconnect if we close explicitly and don't allow reconnects
+        if not allow_reconnects:
+            self._reconnecting = False
 
         self.state.close(code=code, reason=reason)
         to_send = self.state.bytes_to_send()
