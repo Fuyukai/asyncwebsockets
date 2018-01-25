@@ -3,8 +3,6 @@ Websocket client functions.
 """
 from urllib.parse import urlparse
 
-from wsproto.connection import ConnectionType
-
 from asyncwebsockets.ws import ClientWebsocket
 
 

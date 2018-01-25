@@ -11,35 +11,28 @@ from wsproto import events
 from wsproto.connection import ConnectionType, WSConnection
 
 
-class MessageType(enum.Enum):
-    """
-    Represents the type of a message.
-    """
-    TEXT = 0
-    BYTES = 1
-
-
 class WebsocketMessage:
     """
     Represents a message.
     """
-
-    def __init__(self, data: Union[str, bytes]):
-        self.data = data
 
 
 class WebsocketTextMessage(WebsocketMessage):
     """
     Represents a plaintext based message.
     """
-    TYPE = MessageType.TEXT
+    def __init__(self, data: str):
+        #: The :class:`str` data for this text message.
+        self.data = data
 
 
 class WebsocketBytesMessage(WebsocketMessage):
     """
     Represents a binary bytes based message.
     """
-    TYPE = MessageType.BYTES
+    def __init__(self, data: bytes):
+        #: The :class:`bytes` data for this text message.
+        self.data = data
 
 
 class WebsocketClosed(WebsocketMessage):
@@ -63,6 +56,7 @@ class WebsocketConnectionEstablished(WebsocketMessage):
     """
 
     def __init__(self, evt: events.ConnectionEstablished):
+        #: The internal event.
         self.evt = evt
 
 
@@ -72,6 +66,7 @@ class WebsocketConnectionFailed(WebsocketMessage):
     """
 
     def __init__(self, evt: events.ConnectionFailed):
+        #: The internal event.
         self.evt = evt
 
 
