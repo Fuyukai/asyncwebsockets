@@ -15,7 +15,7 @@ setup(
     packages=[
         "asyncwebsockets"
     ],
-    url="https://github.com/SunDwarf/asyncwebsockets",
+    url="https://github.com/Fuyukai/asyncwebsockets",
     license="MIT",
     author="Laura Dickinson",
     author_email="l@veriny.tf",
