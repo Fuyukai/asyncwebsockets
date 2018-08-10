@@ -13,7 +13,7 @@ To install the latest stable version::
 
 To install the latest development version::
 
-    $ pip install git+https://github.com/SunDwarf/asyncwebsockets.git#egg=asyncwebsockets
+    $ pip install git+https://github.com/Fuyukai/asyncwebsockets.git#egg=asyncwebsockets
 
 
 Basic Usage
