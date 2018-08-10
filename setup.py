@@ -27,7 +27,9 @@ setup(
     ],
     install_requires=[
         "multio",
-        "wsproto>=0.11.0"
+        "wsproto>=0.11.0",
+        "async_generator",
+        "yarl"
     ],
     extras_require={},
     python_requires=">=3.6",

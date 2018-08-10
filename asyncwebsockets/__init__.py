@@ -1,11 +1,15 @@
 """
-Websocket library for curio + trio.
+asyncwebsockets - an asynchronous library for handling websockets.
 """
-from asyncwebsockets.client import connect_websocket
-from asyncwebsockets.ws import ClientWebsocket, WebsocketBytesMessage, WebsocketClosed, \
-    WebsocketConnectionEstablished, WebsocketConnectionFailed, WebsocketMessage, \
-    WebsocketTextMessage
+import importlib
+import multio
 
-__all__ = ["connect_websocket", "ClientWebsocket",
-           "WebsocketClosed", "WebsocketBytesMessage", "WebsocketTextMessage", "WebsocketMessage",
-           "WebsocketConnectionEstablished", "WebsocketConnectionFailed"]
+
+def _find_asyncws_class():
+    """
+    Finds the appropriate class for the current library.
+    """
+    path = "asyncwebsockets._specific." + multio.asynclib.lib_name
+    mod = importlib.import_module(path)
+    ws_classname = "{}Websocket".format(multio.asynclib.lib_name.title())
+    return getattr(mod, ws_classname)

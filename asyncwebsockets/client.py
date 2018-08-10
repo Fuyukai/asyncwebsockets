@@ -1,51 +1,33 @@
 """
-Websocket client functions.
+Client connection utilities.
 """
-from urllib.parse import urlparse
+import yarl
+from wsproto.events import ConnectionEstablished
 
-from asyncwebsockets.ws import ClientWebsocket
+from asyncwebsockets._specific import Websocket
+
+try:
+    from contextlib import acontextmanager
+except ImportError:
+    from async_generator import asynccontextmanager as acontextmanager
 
 
-async def connect_websocket(url: str = None, *,
-                            host: str = None, port: int = None,
-                            endpoint: str = None, ssl: bool = False,
-                            reconnecting: bool = True) -> ClientWebsocket:
+@acontextmanager
+async def open_websocket(url: str):
     """
-    Connects a websocket to a server.
-
-    You can provide the URL using either:
-
-    :param url: The URL to connect to.
-
-    Or the individual parts:
-
-    :param host: The host to connect to.
-    :param port: The port to connect to.
-    :param endpoint: The endpoint to connect to.
-    :param ssl: If SSL should be used to connect.
-
-    This also accepts some additional options:
-
-    :param reconnecting: If this websocket should automatically reconnect.
-
-    :return: A :class:`.ClientWebsocket` connected to the server.
+    Opens a websocket.
     """
-    if url is not None:
-        # decompose URL into individual parts
-        split = urlparse(url)
-        ssl = split.scheme == "wss"
+    url = yarl.URL(url)
+    # automatically use ssl if it's websocket secure
+    ssl = url.scheme == "wss"
+    addr = (url.host, int(url.port))
+    ws = Websocket()
+    await ws.__ainit__(addr=addr, ssl=ssl, path=url.path)
 
-        # try and detect host/port automatically
-        try:
-            host, port = split.netloc.split(":")
-            port = int(port)
-        except ValueError:
-            host = split.netloc
-            port = 443 if split.scheme == "wss" else 80
-
-        endpoint = split.path + "?" + split.query
-
-    websocket = ClientWebsocket((host, port, ssl, endpoint),
-                                reconnecting=reconnecting)
-    await websocket.open_connection()
-    return websocket
+    try:
+        event = await ws.next_event()
+        if not isinstance(event, ConnectionEstablished):
+            raise ConnectionError("Failed to establish a connection")
+        yield ws
+    finally:
+        await ws.close()
