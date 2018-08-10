@@ -31,3 +31,10 @@ async def open_websocket(url: str):
         yield ws
     finally:
         await ws.close()
+
+
+try:
+    import curio.meta
+    curio.meta.safe_generator(open_websocket.__wrapped__)
+except ImportError:
+    pass
