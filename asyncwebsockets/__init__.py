@@ -4,6 +4,8 @@ asyncwebsockets - an asynchronous library for handling websockets.
 import importlib
 import multio
 
+from asyncwebsockets.client import open_websocket
+
 
 def _find_asyncws_class():
     """
@@ -13,3 +15,4 @@ def _find_asyncws_class():
     mod = importlib.import_module(path)
     ws_classname = "{}Websocket".format(multio.asynclib.lib_name.title())
     return getattr(mod, ws_classname)
+

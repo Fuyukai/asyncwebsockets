@@ -22,20 +22,13 @@ Basic Usage
 .. code-block:: python3
 
     import multio
-
-    from asyncwebsockets.client import connect_websocket
-    from asyncwebsockets.ws import WebsocketConnectionEstablished, WebsocketBytesMessage
+    import asyncwebsockets
 
     async def test():
-        sock = await connect_websocket("wss://echo.websocket.org", reconnecting=False)
-        async for message in sock:
-            print("Event received", message)
-            if isinstance(message, WebsocketConnectionEstablished):
-                await sock.send_message(b"test")
-
-            elif isinstance(message, WebsocketBytesMessage):
-                print("Got response:", message.data)
-                await sock.close(code=1000, reason="Thank you!")
+        async with asyncwebsockets.open_websocket("wss://echo.websocket.org") as ws:
+            await ws.send("test")
+            evt = await ws.next_event()
+            print(evt.data)
 
 
     multio.init("curio")
