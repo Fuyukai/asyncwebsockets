@@ -28,7 +28,7 @@ Basic Usage
         async with asyncwebsockets.open_websocket("wss://echo.websocket.org") as ws:
             await ws.send("test")
             evt = await ws.next_event()
-            print(evt.data)
+            print(type(evt), getattr(evt, 'data', None))
 
 
     multio.init("curio")
