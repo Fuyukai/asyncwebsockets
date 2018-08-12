@@ -27,10 +27,10 @@ Basic Usage
 
 To open a new websocket connection to a server, use :func:`.connect_websocket`:
 
-.. autofunction:: asyncwebsockets.client.connect_websocket
+.. autofunction:: asyncwebsockets.client.open_websocket
     :async:
 
-This will return a new :class:`.ClientWebsocket`, which is the main object used for communication
+This will return a new :class:`.Websocket`, which is the main object used for communication
 with the server.
 
 You can get new events from the websocket by async iteration over the websocket object, like so:
@@ -44,11 +44,13 @@ You can send data to the websocket in response with :meth:`.ClientWebsocket.send
 
 .. code-block:: python3
 
-    async for evt in websocket:
-        if isinstance(evt, WebsocketBytesMessage):
-            await websocket.send_message(b"Thanks for the message!")
+    from wsproto.events import DataReceived
 
-.. automethod:: asyncwebsockets.ws.ClientWebsocket.send_message
+    async for evt in websocket:
+       if isinstance(evt, DataReceived):
+          await websocket.send(b"Thanks for the data!")
+
+.. automethod:: asyncwebsockets.websocket.Websocket.send
     :async:
 
 Finally, the websocket can be closed with the usage of :meth:`.ClientWebsocket.close`:
@@ -57,21 +59,13 @@ Finally, the websocket can be closed with the usage of :meth:`.ClientWebsocket.c
 
     await websocket.close(1000, reason="Goodbye!")
 
-.. automethod:: asyncwebsockets.ws.ClientWebsocket.close
+.. automethod:: asyncwebsockets.websocket.Websocket.close
 
 Event Listing
 =============
 
-A full listing of events that can be yielded from the websockets can be found here.
+Events are the standard wsproto events.
 
-.. py:currentmodule:: asyncwebsockets.ws
-
-.. autoclass:: WebsocketMessage
-.. autoclass:: WebsocketTextMessage
-.. autoclass:: WebsocketBytesMessage
-.. autoclass:: WebsocketClosed
-.. autoclass:: WebsocketConnectionEstablished
-.. autoclass:: WebsocketConnectionFailed
 
 Changelog
 =========
