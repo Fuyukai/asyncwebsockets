@@ -32,7 +32,7 @@ Basic Usage
 
 
     multio.init("curio")
-    multio.run(main)
+    multio.run(test)
 
 .. _curio: https://curio.readthedocs.io/en/latest/
 .. _trio: https://trio.readthedocs.io/en/latest/
