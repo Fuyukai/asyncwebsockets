@@ -13,7 +13,8 @@ setup(
         "local_scheme": "dirty-tag"
     },
     packages=[
-        "asyncwebsockets"
+        "asyncwebsockets",
+        "asyncwebsockets._specific"
     ],
     url="https://github.com/Fuyukai/asyncwebsockets",
     license="MIT",
