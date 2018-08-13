@@ -70,6 +70,11 @@ Events are the standard wsproto events.
 Changelog
 =========
 
+0.3.0
+-----
+
+ - Redesign API, again, hopefully for the last time.
+
 0.2.0
 -----
 
