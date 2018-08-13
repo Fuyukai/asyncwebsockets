@@ -23,9 +23,6 @@ class CurioWebsocket(Websocket):
         Gets the next event.
         """
         while True:
-            data = await self._sock.recv(4096)
-            self._connection.receive_bytes(data)
-
             for event in self._connection.events():
                 if isinstance(event, events.DataReceived):
                     # check if we need to buffer
@@ -36,6 +33,9 @@ class CurioWebsocket(Websocket):
                         break  # exit for loop
                 else:
                     return event
+
+            data = await self._sock.recv(4096)
+            self._connection.receive_bytes(data)
 
     async def close(self, code: int = 1006, reason: str = "Connection closed"):
         """

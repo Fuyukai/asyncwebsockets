@@ -32,9 +32,6 @@ class TrioWebsocket(Websocket):
             self._cancel_scopes.add(scope)
             try:
                 while True:
-                    data = await self._sock.receive_some(4096)
-                    self._connection.receive_bytes(data)
-
                     for event in self._connection.events():
                         if isinstance(event, events.DataReceived):
                             # check if we need to buffer
@@ -45,6 +42,9 @@ class TrioWebsocket(Websocket):
                                 break  # exit for loop
                         else:
                             return event
+
+                    data = await self._sock.receive_some(4096)
+                    self._connection.receive_bytes(data)
             finally:
                 self._cancel_scopes.remove(scope)
 
