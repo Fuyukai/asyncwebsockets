@@ -1,7 +1,7 @@
 asyncwebsockets
 =======
 
-asyncwebsockets is a `curio`_ + `trio`_ compatible library for connecting and serving websockets.
+asyncwebsockets is a `curio`_ + `trio`_ compatible websocket client library.
 
 
 Installation
