@@ -20,14 +20,14 @@ setup(
     license="MIT",
     author="Laura Dickinson",
     author_email="l@veriny.tf",
-    description="A websocket library for curio + trio",
+    description="A websocket library",
     long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),
     setup_requires=[
         "setuptools_scm",
         "pytest-runner"
     ],
     install_requires=[
-        "multio",
+        "anyio",
         "wsproto>=0.11.0",
         "async_generator",
         "yarl"

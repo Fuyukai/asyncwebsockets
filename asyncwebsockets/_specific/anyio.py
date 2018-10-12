@@ -1,7 +1,7 @@
 """
 Websocket implementation for trio
 """
-import trio
+import anyio
 from typing import Union
 from wsproto import events
 from wsproto.connection import WSConnection, ConnectionType
@@ -9,15 +9,14 @@ from wsproto.connection import WSConnection, ConnectionType
 from asyncwebsockets.websocket import Websocket
 
 
-class TrioWebsocket(Websocket):
+class AnyioWebsocket(Websocket):
     async def __ainit__(self, addr, path: str, *, ssl: bool = True):
         if ssl:
-            self._sock = await trio.open_ssl_over_tcp_stream(*addr, https_compatible=True)
+            self._sock = await anyio.connect_tcp(*addr, tls=True)
         else:
-            self._sock = await trio.open_tcp_stream(*addr)
+            self._sock = await anyio.connect_tcp(*addr, tls=False)
 
         self._cancel_scopes = set()
-
         self._connection = WSConnection(ConnectionType.CLIENT, host=addr[0], resource=path)
 
         # start the handshake
@@ -28,7 +27,7 @@ class TrioWebsocket(Websocket):
         """
         Gets the next event.
         """
-        with trio.open_cancel_scope() as scope:
+        async with anyio.open_cancel_scope() as scope:
             self._cancel_scopes.add(scope)
             try:
                 while True:
@@ -60,7 +59,7 @@ class TrioWebsocket(Websocket):
         self._connection.close(code=code, reason=reason)
         data = self._connection.bytes_to_send()
         await self._sock.send_all(data)
-        await self._sock.aclose()
+        self._sock.close()
         # cancel any outstanding listeners
         for scope in self._cancel_scopes:
             scope.cancel()
