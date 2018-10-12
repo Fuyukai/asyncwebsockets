@@ -17,6 +17,19 @@ async def open_websocket(url: str):
     """
     Opens a websocket.
     """
+    ws = None
+    try:
+        ws = await create_websocket(url)
+        yield ws
+    finally:
+        if ws is not None:
+            await ws.close()
+
+
+async def create_websocket(url: str):
+    """
+    A more low-level form of websocket. You are responsible for closing this websocket.
+    """
     url = yarl.URL(url)
     # automatically use ssl if it's websocket secure
     ssl = url.scheme == "wss"
@@ -24,13 +37,11 @@ async def open_websocket(url: str):
     ws = Websocket()
     await ws.__ainit__(addr=addr, ssl=ssl, path=url.path)
 
-    try:
-        event = await ws.next_event()
-        if not isinstance(event, ConnectionEstablished):
-            raise ConnectionError("Failed to establish a connection")
-        yield ws
-    finally:
-        await ws.close()
+    event = await ws.next_event()
+    if not isinstance(event, ConnectionEstablished):
+        raise ConnectionError("Failed to establish a connection")
+
+    return ws
 
 
 try:
