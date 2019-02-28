@@ -7,7 +7,7 @@ Welcome to asyncwebsockets's documentation!
 ===========================================
 
 asyncwebsockets is a Python 3.6+ library for interacting with websockets over the internet from
-asynchronous code. asyncwebsockets is designed around `multio`_, allowing it to work with
+asynchronous code. asyncwebsockets is designed around `anyio`_, allowing it to work with
 multiple async backends without any modifications.
 
 Installation
@@ -86,4 +86,4 @@ Changelog
  - Initial release.
 
 
-.. _multio: https://github.com/theelous3/multio
+.. _anyio: https://github.com/theelous3/anyio
