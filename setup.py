@@ -12,10 +12,7 @@ setup(
         "version_scheme": "guess-next-dev",
         "local_scheme": "dirty-tag"
     },
-    packages=[
-        "asyncwebsockets",
-        "asyncwebsockets._specific"
-    ],
+    packages=[ "asyncwebsockets", ],
     url="https://github.com/Fuyukai/asyncwebsockets",
     license="MIT",
     author="Laura Dickinson",
