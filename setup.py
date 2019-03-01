@@ -12,10 +12,7 @@ setup(
         "version_scheme": "guess-next-dev",
         "local_scheme": "dirty-tag"
     },
-    packages=[
-        "asyncwebsockets",
-        "asyncwebsockets._specific"
-    ],
+    packages=[ "asyncwebsockets", ],
     url="https://github.com/Fuyukai/asyncwebsockets",
     license="MIT",
     author="Laura Dickinson",
@@ -27,7 +24,7 @@ setup(
         "pytest-runner"
     ],
     install_requires=[
-        "anyio",
+        "anyio>=1.0.0b2",
         "wsproto>=0.11.0",
         "async_generator",
         "yarl"
