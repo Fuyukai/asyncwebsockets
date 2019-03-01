@@ -24,7 +24,7 @@ setup(
         "pytest-runner"
     ],
     install_requires=[
-        "anyio",
+        "anyio>=1.0.0b2",
         "wsproto>=0.11.0",
         "async_generator",
         "yarl"
