@@ -1,7 +1,8 @@
 asyncwebsockets
 =======
 
-asyncwebsockets is a `curio`_ + `trio`_ compatible websocket client library.
+asyncwebsockets is an `anyio`_-compatible websocket client library.
+Thus it works with `curio`_, `trio`_, or ``asyncio``.
 
 
 Installation
@@ -21,7 +22,7 @@ Basic Usage
 
 .. code-block:: python3
 
-    import multio
+    import anyio
     import asyncwebsockets
 
     async def test():
@@ -31,8 +32,8 @@ Basic Usage
             print(type(evt), getattr(evt, 'data', None))
 
 
-    multio.init("curio")
-    multio.run(test)
+    anyio.run(test)
 
 .. _curio: https://curio.readthedocs.io/en/latest/
 .. _trio: https://trio.readthedocs.io/en/latest/
+.. _anyio: https://anyio.readthedocs.io/en/latest/
