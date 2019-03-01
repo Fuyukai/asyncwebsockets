@@ -1,3 +1,9 @@
+asyncwebsockets (0.3.2-1) unstable; urgency=medium
+
+  * export create_websocket
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 01 Mar 2019 14:14:27 +0100
+
 asyncwebsockets (0.3.1~dev6-2) unstable; urgency=medium
 
   * Merge
