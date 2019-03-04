@@ -1,3 +1,9 @@
+asyncwebsockets (0.3.3-3) unstable; urgency=medium
+
+  * Merge: extra_headers defaults to an empty list
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 04 Mar 2019 12:12:26 +0100
+
 asyncwebsockets (0.3.3-2) unstable; urgency=medium
 
   * Headers are optional and lists

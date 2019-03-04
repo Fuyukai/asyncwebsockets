@@ -22,6 +22,8 @@ class Websocket:
         self._sock = await anyio.connect_tcp(*addr, **connect_kw)
 
         self._connection = WSConnection(ConnectionType.CLIENT)
+        if headers is None:
+            headers = []
         data = self._connection.send(Request(host=addr[0], target=path, extra_headers=headers))
         await self._sock.send_all(data)
 
