@@ -25,7 +25,7 @@ setup(
     ],
     install_requires=[
         "anyio>=1.0.0b2",
-        "wsproto>=0.11.0",
+        "wsproto>=0.13.0",
         "async_generator",
         "yarl"
     ],

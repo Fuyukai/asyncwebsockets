@@ -4,11 +4,11 @@ Base class for all websockets.
 from io import BytesIO, StringIO
 import anyio
 
-from typing import Union
-from wsproto.events import DataReceived, BytesReceived, TextReceived, ConnectionRequested, \
-    ConnectionEstablished, ConnectionClosed, ConnectionFailed, PingReceived, PongReceived
+from typing import Union, Optional, List
 
-from wsproto.connection import WSConnection, ConnectionType
+from wsproto import WSConnection, ConnectionType
+from wsproto.events import Message, BytesMessage, TextMessage, Request, \
+    AcceptConnection, CloseConnection
 
 class Websocket:
     _scope = None
@@ -18,20 +18,18 @@ class Websocket:
         self._string_buffer = StringIO()
         self._closed = False
 
-    async def __ainit__(self, addr, path: str, **connect_kw):
+    async def __ainit__(self, addr, path: str, headers: Optional[List] = None, **connect_kw):
         self._sock = await anyio.connect_tcp(*addr, **connect_kw)
 
-        self._connection = WSConnection(ConnectionType.CLIENT, host=addr[0], resource=path)
-
-        # start the handshake
-        data = self._connection.bytes_to_send()
+        self._connection = WSConnection(ConnectionType.CLIENT)
+        data = self._connection.send(Request(host=addr[0], target=path, extra_headers=headers))
         await self._sock.send_all(data)
 
         assert self._scope is None
         self._scope = True
         try:
             event = await self._next_event()
-            if not isinstance(event, ConnectionEstablished):
+            if not isinstance(event, AcceptConnection):
                 raise ConnectionError("Failed to establish a connection", event)
         finally:
             self._scope = None
@@ -44,7 +42,7 @@ class Websocket:
         while True:
             for event in self._connection.events():
                 print("EVT:",event)
-                if isinstance(event, DataReceived):
+                if isinstance(event, Message):
                     # check if we need to buffer
                     if event.message_finished:
                         return self._wrap_data(self._gather_buffers(event))
@@ -56,8 +54,8 @@ class Websocket:
 
             data = await self._sock.receive_some(4096)
             if not data:
-                return ConnectionFailed(500,"Socket closed")
-            self._connection.receive_bytes(data)
+                return CloseConnection(code=500, reason="Socket closed")
+            self._connection.receive_data(data)
 
     async def close(self, code: int = 1006, reason: str = "Connection closed"):
         """
@@ -68,13 +66,15 @@ class Websocket:
 
         self._closed = True
 
-        self._connection.close(code=code, reason=reason)
-        data = self._connection.bytes_to_send()
-        await self._sock.send_all(data)
-        await self._sock.close()
         if self._scope is not None:
             await self._scope.cancel()
             # cancel any outstanding listeners
+
+        data = self._connection.send(CloseConnection(code=code, reason=reason))
+        await self._sock.send_all(data)
+
+        # No, we don't wait for the correct reply
+        await self._sock.close()
 
     async def send(self, data: Union[bytes, str], final: bool = True):
         """
@@ -84,20 +84,20 @@ class Websocket:
         data = self._connection.bytes_to_send()
         await self._sock.send_all(data)
 
-    def _buffer(self, event: DataReceived):
+    def _buffer(self, event: Message):
         """
         Buffers an event, if applicable.
         """
-        if isinstance(event, BytesReceived):
+        if isinstance(event, BytesMessage):
             self._byte_buffer.write(event.data)
-        elif isinstance(event, TextReceived):
+        elif isinstance(event, TextMessage):
             self._string_buffer.write(event.data)
 
-    def _gather_buffers(self, event: DataReceived):
+    def _gather_buffers(self, event: Message):
         """
         Gathers all the data from a buffer.
         """
-        if isinstance(event, BytesReceived):
+        if isinstance(event, BytesMessage):
             buf = self._byte_buffer
         else:
             buf = self._string_buffer
@@ -115,9 +115,9 @@ class Websocket:
         Wraps data into the right event.
         """
         if isinstance(data, str):
-            return TextReceived(data, True, True)
+            return TextMessage(data=data, frame_finished=True, message_finished=True)
         elif isinstance(data, bytes):
-            return BytesReceived(data, True, True)
+            return BytesMessage(data=data, frame_finished=True, message_finished=True)
 
     async def __aiter__(self):
         async with anyio.open_cancel_scope() as scope:
@@ -127,7 +127,7 @@ class Websocket:
             try:
                 while True:
                     msg = await self._next_event()
-                    if isinstance(msg, (ConnectionFailed, ConnectionClosed)):
+                    if isinstance(msg, CloseConnection):
                         return
                     yield msg
             finally:
