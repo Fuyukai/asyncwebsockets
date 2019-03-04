@@ -4,7 +4,6 @@ Client connection utilities.
 import yarl
 from typing import Optional
 from ssl import SSLContext
-from wsproto.events import ConnectionEstablished
 
 from asyncwebsockets.websocket import Websocket
 
