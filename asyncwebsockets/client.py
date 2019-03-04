@@ -45,7 +45,7 @@ async def create_websocket(url: str, ssl: Optional[SSLContext] = None):
 
     addr = (url.host, int(url.port))
     ws = Websocket()
-    await ws.__ainit__(addr=addr, path=url.path, **args)
+    await ws.__ainit__(addr=addr, path=url.path_qs, **args)
     return ws
 
 
