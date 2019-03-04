@@ -14,7 +14,7 @@ except ImportError:
 
 
 @acontextmanager
-async def open_websocket(url: str, headers: Optional[dict]):
+async def open_websocket(url: str, headers: Optional[list] = None):
     """
     Opens a websocket.
     """
@@ -28,7 +28,7 @@ async def open_websocket(url: str, headers: Optional[dict]):
 
 
 async def create_websocket(url: str, ssl: Optional[SSLContext] = None,
-        headers: Optional[dict] = None):
+        headers: Optional[list] = None):
     """
     A more low-level form of websocket. You are responsible for closing this websocket.
     """
