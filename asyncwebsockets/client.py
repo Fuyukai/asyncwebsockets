@@ -14,7 +14,7 @@ except ImportError:
 
 
 @acontextmanager
-async def open_websocket(url: str):
+async def open_websocket(url: str, headers: Optional[dict]):
     """
     Opens a websocket.
     """
@@ -27,12 +27,16 @@ async def open_websocket(url: str):
             await ws.close()
 
 
-async def create_websocket(url: str, ssl: Optional[SSLContext] = None):
+async def create_websocket(url: str, ssl: Optional[SSLContext] = None,
+        headers: Optional[dict] = None):
     """
     A more low-level form of websocket. You are responsible for closing this websocket.
     """
     url = yarl.URL(url)
     args = {}
+    if headers:
+        args['headers'] = headers
+
     # automatically use ssl if it's websocket secure
     if ssl is None:
         ssl = url.scheme == "wss"

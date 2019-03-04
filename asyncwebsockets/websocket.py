@@ -18,11 +18,11 @@ class Websocket:
         self._string_buffer = StringIO()
         self._closed = False
 
-    async def __ainit__(self, addr, path: str, **connect_kw):
+    async def __ainit__(self, addr, path: str, headers: Optional[List] = None, **connect_kw):
         self._sock = await anyio.connect_tcp(*addr, **connect_kw)
 
         self._connection = WSConnection(ConnectionType.CLIENT)
-        data = self._connection.send(Request(host=addr[0], target=path))
+        data = self._connection.send(Request(host=addr[0], target=path, extra_headers=headers))
         await self._sock.send_all(data)
 
         assert self._scope is None
