@@ -43,7 +43,6 @@ class Websocket:
         """
         while True:
             for event in self._connection.events():
-                print("EVT:",event)
                 if isinstance(event, Message):
                     # check if we need to buffer
                     if event.message_finished:
