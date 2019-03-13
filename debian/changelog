@@ -1,3 +1,9 @@
+asyncwebsockets (0.3.4-2) unstable; urgency=medium
+
+  * Tighten requirements
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 13 Mar 2019 08:41:14 +0100
+
 asyncwebsockets (0.3.4-1) unstable; urgency=medium
 
   * Merge: superfluous print

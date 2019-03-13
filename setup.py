@@ -27,7 +27,7 @@ setup(
         "anyio>=1.0.0b2",
         "wsproto>=0.13.0",
         "async_generator",
-        "yarl"
+        "yarl",
     ],
     extras_require={},
     python_requires=">=3.6",
