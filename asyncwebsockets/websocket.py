@@ -81,8 +81,11 @@ class Websocket:
         """
         Sends some data down the connection.
         """
-        self._connection.send_data(payload=data, final=True)
-        data = self._connection.bytes_to_send()
+        if isinstance(data, str):
+            data = TextMessage(data=data)
+        else:
+            data = BytesMessage(data=data)
+        data = self._connection.send(event=data)
         await self._sock.send_all(data)
 
     def _buffer(self, event: Message):

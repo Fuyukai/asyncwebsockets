@@ -1,7 +1,7 @@
 import pytest
 
 from asyncwebsockets.client import open_websocket
-from wsproto.events import ConnectionEstablished, BytesReceived
+from wsproto.events import BytesMessage, TextMessage
 
 @pytest.mark.trio
 async def test_echo():
@@ -10,7 +10,7 @@ async def test_echo():
         rcvd = 0
         async for message in sock:
             print("Event received", message)
-            if isinstance(message, BytesReceived):
+            if isinstance(message, BytesMessage):
                 assert message.data == b"test"
                 rcvd += 1
                 await sock.close(code=1000, reason="Thank you!")
@@ -20,13 +20,13 @@ async def test_echo():
 @pytest.mark.trio
 async def test_secure_echo():
     async with  open_websocket("wss://echo.websocket.org") as sock:
-        await sock.send(b"test")
+        await sock.send("test")
         rcvd = 0
         async for message in sock:
             print("Event received", message)
 
-            if isinstance(message, BytesReceived):
-                assert message.data == b"test"
+            if isinstance(message, TextMessage):
+                assert message.data == "test"
                 rcvd += 1
                 await sock.close(code=1000, reason="Thank you!")
         assert rcvd == 1
