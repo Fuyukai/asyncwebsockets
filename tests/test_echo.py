@@ -1,6 +1,6 @@
-import pytest
 from wsproto.events import BytesMessage, TextMessage
 
+import pytest
 from asyncwebsockets.client import open_websocket
 
 
