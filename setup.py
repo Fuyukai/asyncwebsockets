@@ -21,7 +21,10 @@ setup(
     long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),
     setup_requires=[
         "setuptools_scm",
-        "pytest-runner"
+        "pytest-runner",
+    ],
+    tests_require=[
+        "pytest-trio",
     ],
     install_requires=[
         "anyio>=1.0.0b2",
