@@ -27,15 +27,16 @@ async def open_websocket(url: str, headers: Optional[list] = None):
             await ws.close()
 
 
-async def create_websocket(url: str, ssl: Optional[SSLContext] = None,
-        headers: Optional[list] = None):
+async def create_websocket(
+    url: str, ssl: Optional[SSLContext] = None, headers: Optional[list] = None
+):
     """
     A more low-level form of websocket. You are responsible for closing this websocket.
     """
     url = yarl.URL(url)
     args = {}
     if headers:
-        args['headers'] = headers
+        args["headers"] = headers
 
     # automatically use ssl if it's websocket secure
     if ssl is None:
@@ -43,9 +44,9 @@ async def create_websocket(url: str, ssl: Optional[SSLContext] = None,
     if ssl:
         if ssl is True:
             ssl = SSLContext()
-        args['ssl_context'] = ssl
-        args['autostart_tls'] = True
-        args['tls_standard_compatible'] = False
+        args["ssl_context"] = ssl
+        args["autostart_tls"] = True
+        args["tls_standard_compatible"] = False
 
     addr = (url.host, int(url.port))
     ws = Websocket()
@@ -55,6 +56,7 @@ async def create_websocket(url: str, ssl: Optional[SSLContext] = None,
 
 try:
     import curio.meta
+
     curio.meta.safe_generator(open_websocket.__wrapped__)
 except ImportError:
     pass

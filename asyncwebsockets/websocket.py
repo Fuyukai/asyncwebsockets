@@ -7,8 +7,15 @@ import anyio
 from typing import Union, Optional, List
 
 from wsproto import WSConnection, ConnectionType
-from wsproto.events import Message, BytesMessage, TextMessage, Request, \
-    AcceptConnection, CloseConnection
+from wsproto.events import (
+    Message,
+    BytesMessage,
+    TextMessage,
+    Request,
+    AcceptConnection,
+    CloseConnection,
+)
+
 
 class Websocket:
     _scope = None
@@ -18,13 +25,17 @@ class Websocket:
         self._string_buffer = StringIO()
         self._closed = False
 
-    async def __ainit__(self, addr, path: str, headers: Optional[List] = None, **connect_kw):
+    async def __ainit__(
+        self, addr, path: str, headers: Optional[List] = None, **connect_kw
+    ):
         self._sock = await anyio.connect_tcp(*addr, **connect_kw)
 
         self._connection = WSConnection(ConnectionType.CLIENT)
         if headers is None:
             headers = []
-        data = self._connection.send(Request(host=addr[0], target=path, extra_headers=headers))
+        data = self._connection.send(
+            Request(host=addr[0], target=path, extra_headers=headers)
+        )
         await self._sock.send_all(data)
 
         assert self._scope is None
@@ -35,7 +46,6 @@ class Websocket:
                 raise ConnectionError("Failed to establish a connection", event)
         finally:
             self._scope = None
-
 
     async def _next_event(self):
         """
@@ -136,4 +146,3 @@ class Websocket:
                     yield msg
             finally:
                 self._scope = None
-

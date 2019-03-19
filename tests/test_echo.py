@@ -3,9 +3,10 @@ import pytest
 from asyncwebsockets.client import open_websocket
 from wsproto.events import BytesMessage, TextMessage
 
+
 @pytest.mark.trio
 async def test_echo():
-    async with  open_websocket("ws://echo.websocket.org") as sock:
+    async with open_websocket("ws://echo.websocket.org") as sock:
         await sock.send(b"test")
         rcvd = 0
         async for message in sock:
@@ -17,9 +18,10 @@ async def test_echo():
 
         assert rcvd == 1
 
+
 @pytest.mark.trio
 async def test_secure_echo():
-    async with  open_websocket("wss://echo.websocket.org") as sock:
+    async with open_websocket("wss://echo.websocket.org") as sock:
         await sock.send("test")
         rcvd = 0
         async for message in sock:
@@ -30,4 +32,3 @@ async def test_secure_echo():
                 rcvd += 1
                 await sock.close(code=1000, reason="Thank you!")
         assert rcvd == 1
-
