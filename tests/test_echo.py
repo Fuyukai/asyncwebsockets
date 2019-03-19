@@ -1,7 +1,7 @@
 import pytest
+from wsproto.events import BytesMessage, TextMessage
 
 from asyncwebsockets.client import open_websocket
-from wsproto.events import BytesMessage, TextMessage
 
 
 @pytest.mark.trio

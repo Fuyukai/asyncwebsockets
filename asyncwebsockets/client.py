@@ -1,9 +1,10 @@
 """
 Client connection utilities.
 """
-import yarl
-from typing import Optional
 from ssl import SSLContext
+from typing import Optional
+
+import yarl
 
 from asyncwebsockets.websocket import Websocket
 

@@ -2,18 +2,17 @@
 Base class for all websockets.
 """
 from io import BytesIO, StringIO
+from typing import List, Optional, Union
+
 import anyio
-
-from typing import Union, Optional, List
-
-from wsproto import WSConnection, ConnectionType
+from wsproto import ConnectionType, WSConnection
 from wsproto.events import (
-    Message,
-    BytesMessage,
-    TextMessage,
-    Request,
     AcceptConnection,
+    BytesMessage,
     CloseConnection,
+    Message,
+    Request,
+    TextMessage,
 )
 
 
