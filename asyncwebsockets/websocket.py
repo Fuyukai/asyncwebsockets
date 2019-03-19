@@ -90,10 +90,8 @@ class Websocket:
         """
         Sends some data down the connection.
         """
-        if isinstance(data, str):
-            data = TextMessage(data=data)
-        else:
-            data = BytesMessage(data=data)
+        MsgType = TextMessage if isinstance(data, str) else BytesMessage
+        data = MsgType(data=data, message_finished=final)
         data = self._connection.send(event=data)
         await self._sock.send_all(data)
 
