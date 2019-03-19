@@ -31,4 +31,13 @@ setup(
     ],
     extras_require={},
     python_requires=">=3.6",
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3',
+        'Framework :: AsyncIO',
+        'Framework :: Trio',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved',
+        'Topic :: Internet :: WWW/HTTP',
+    ],
 )
