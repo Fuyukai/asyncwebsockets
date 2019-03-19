@@ -21,7 +21,7 @@ async def open_websocket(url: str, headers: Optional[list] = None):
     """
     ws = None
     try:
-        ws = await create_websocket(url)
+        ws = await create_websocket(url, headers=headers)
         yield ws
     finally:
         if ws is not None:

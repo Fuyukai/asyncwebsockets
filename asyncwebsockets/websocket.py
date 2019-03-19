@@ -18,6 +18,8 @@ from wsproto.events import (
 
 class Websocket:
     _scope = None
+    _sock = None
+    _connection = None
 
     def __init__(self):
         self._byte_buffer = BytesIO()
@@ -56,9 +58,8 @@ class Websocket:
                     # check if we need to buffer
                     if event.message_finished:
                         return self._wrap_data(self._gather_buffers(event))
-                    else:
-                        self._buffer(event)
-                        break  # exit for loop
+                    self._buffer(event)
+                    break  # exit for loop
                 else:
                     return event
 
@@ -121,14 +122,13 @@ class Websocket:
         buf.truncate()
         return data
 
-    def _wrap_data(self, data: Union[str, bytes]):
+    @staticmethod
+    def _wrap_data(data: Union[str, bytes]):
         """
         Wraps data into the right event.
         """
-        if isinstance(data, str):
-            return TextMessage(data=data, frame_finished=True, message_finished=True)
-        elif isinstance(data, bytes):
-            return BytesMessage(data=data, frame_finished=True, message_finished=True)
+        MsgType = TextMessage if isinstance(data, str) else BytesMessage
+        return MsgType(data=data, frame_finished=True, message_finished=True)
 
     async def __aiter__(self):
         async with anyio.open_cancel_scope() as scope:
