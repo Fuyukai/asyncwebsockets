@@ -44,11 +44,11 @@ You can send data to the websocket in response with :meth:`.ClientWebsocket.send
 
 .. code-block:: python3
 
-    from wsproto.events import DataReceived
+    from wsproto.events import TextMessage
 
     async for evt in websocket:
-       if isinstance(evt, DataReceived):
-          await websocket.send(b"Thanks for the data!")
+       if isinstance(evt, TextMessage):
+          await websocket.send("Thanks for the data!")
 
 .. automethod:: asyncwebsockets.websocket.Websocket.send
     :async:
@@ -69,6 +69,11 @@ Events are the standard wsproto events.
 
 Changelog
 =========
+
+0.4.0
+-----
+
+ - Adapt to current wsproto design
 
 0.3.0
 -----
