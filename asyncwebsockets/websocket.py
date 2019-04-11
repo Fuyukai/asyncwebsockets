@@ -8,6 +8,7 @@ import anyio
 from wsproto import ConnectionType, WSConnection
 from wsproto.events import (
     AcceptConnection,
+    RejectConnection,
     BytesMessage,
     CloseConnection,
     Message,
@@ -27,15 +28,26 @@ class Websocket:
         self._closed = False
 
     async def __ainit__(
-        self, addr, path: str, headers: Optional[List] = None, **connect_kw
+        self, addr, path: str, headers: Optional[List] = None, subprotocols=None, **connect_kw
     ):
-        self._sock = await anyio.connect_tcp(*addr, **connect_kw)
+        sock = await anyio.connect_tcp(*addr, **connect_kw)
+        await self.start_client(sock, addr, path=path, headers=headers,
+                subprotocols=subprotocols)
 
+    async def start_client(self, sock: anyio.abc.SocketStream, addr, path: str, headers: Optional[List] = None, subprotocols: Optional[List[str]]=None):
+        """Start a client WS connection on this socket.
+        
+        Returns: the AcceptConnection message.
+        """
+        self._sock = sock
         self._connection = WSConnection(ConnectionType.CLIENT)
         if headers is None:
             headers = []
+        if subprotocols is None:
+            subprotocols = []
         data = self._connection.send(
-            Request(host=addr[0], target=path, extra_headers=headers)
+            Request(host=addr[0], target=path, extra_headers=headers,
+                subprotocols=subprotocols)
         )
         await self._sock.send_all(data)
 
@@ -45,8 +57,45 @@ class Websocket:
             event = await self._next_event()
             if not isinstance(event, AcceptConnection):
                 raise ConnectionError("Failed to establish a connection", event)
+            return event
         finally:
             self._scope = None
+
+    async def start_server(self, sock: anyio.abc.SocketStream, filter=None):
+        """Start a server WS connection on this socket.
+
+        Filter: an async callable that gets passed the initial Request.
+        It may return an AcceptConnection message, a bool, or a string (the
+        subprotocol to use).
+        Returns: the Request message.
+        """
+        assert self._scope is None
+        self._scope = True
+        self._sock = sock
+        self._connection = WSConnection(ConnectionType.SERVER)
+
+        try:
+            event = await self._next_event()
+            if not isinstance(event, Request):
+                raise ConnectionError("Failed to establish a connection", event)
+            msg = None
+            if filter is not None:
+                msg = await filter(Request)
+                if not msg:
+                    msg = RejectConnection()
+                elif msg is True:
+                    msg = None
+                elif isinstance(msg, str):
+                    msg = AcceptConnection(subprotocol=msg)
+            if not msg:
+                msg = AcceptConnection(subprotocol=event.subprotocols[0])
+            data = self._connection.send(msg)
+            await self._sock.send_all(data)
+            if not isinstance(msg, AcceptConnection):
+                raise ConnectionError("Not accepted",msg)
+        finally:
+            self._scope = None
+
 
     async def _next_event(self):
         """
