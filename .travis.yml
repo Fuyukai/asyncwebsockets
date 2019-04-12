@@ -1,0 +1,40 @@
+dist: trusty
+sudo: false
+language: python
+
+branches:
+  only:
+    - master
+    - /^\d+\.\d+\.X$/
+
+cache: pip
+
+env:
+  global:
+    - CI_DEPS=codecov>=2.0.5
+    - CI_COMMANDS=codecov
+
+matrix:
+  include:
+    # Main tests on supported Python versions.
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      env: TOXENV=py37
+      dist: xenial
+      sudo: true # required workaround for https://github.com/travis-ci/travis-ci/issues/9815
+
+    # Linting, docs, and other non-test stuff.
+    - python: 3.6
+      env: TOXENV=lint
+    - python: 3.6
+      env: TOXENV=docs
+    - python: "3.6"
+      env: TOXENV=packaging
+
+install:
+  - "pip install -U pip setuptools"
+  - "pip install -U tox"
+
+script:
+  - tox -- --verbose

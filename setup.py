@@ -12,17 +12,16 @@ setup(
         "version_scheme": "guess-next-dev",
         "local_scheme": "dirty-tag"
     },
-    packages=[ "asyncwebsockets", ],
+    packages=["asyncwebsockets"],
     url="https://github.com/Fuyukai/asyncwebsockets",
     license="MIT",
     author="Laura Dickinson",
     author_email="l@veriny.tf",
     description="A websocket library",
-    long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),
-    setup_requires=[
-        "setuptools_scm",
-        "pytest-runner"
-    ],
+    long_description=Path(__file__).with_name("README.rst").read_text(
+        encoding="utf-8"),
+    setup_requires=["setuptools_scm", "pytest-runner"],
+    tests_require=["pytest-trio"],
     install_requires=[
         "anyio>=1.0.0b2",
         "wsproto>=0.13.0",
@@ -31,4 +30,13 @@ setup(
     ],
     extras_require={},
     python_requires=">=3.6",
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3",
+        "Framework :: AsyncIO",
+        "Framework :: Trio",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved",
+        "Topic :: Internet :: WWW/HTTP",
+    ],
 )

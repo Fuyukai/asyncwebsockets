@@ -1,5 +1,5 @@
 asyncwebsockets
-=======
+===============
 
 asyncwebsockets is an `anyio`_-compatible websocket client library.
 Thus it works with `curio`_, `trio`_, or ``asyncio``.

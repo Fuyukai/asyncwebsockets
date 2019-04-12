@@ -1,30 +1,66 @@
 """
 Base class for all websockets.
 """
+# pylint: disable=R0913
+
 from io import BytesIO, StringIO
+from typing import List, Optional, Union
+
 import anyio
+from wsproto import ConnectionType, WSConnection
+from wsproto.events import (
+    AcceptConnection,
+    RejectConnection,
+    BytesMessage,
+    CloseConnection,
+    Message,
+    Request,
+    TextMessage,
+)
 
-from typing import Union, Optional, List
-
-from wsproto import WSConnection, ConnectionType
-from wsproto.events import Message, BytesMessage, TextMessage, Request, \
-    AcceptConnection, CloseConnection
 
 class Websocket:
     _scope = None
+    _sock = None
+    _connection = None
 
     def __init__(self):
         self._byte_buffer = BytesIO()
         self._string_buffer = StringIO()
         self._closed = False
 
-    async def __ainit__(self, addr, path: str, headers: Optional[List] = None, **connect_kw):
-        self._sock = await anyio.connect_tcp(*addr, **connect_kw)
+    async def __ainit__(self,
+                        addr,
+                        path: str,
+                        headers: Optional[List] = None,
+                        subprotocols=None,
+                        **connect_kw):
+        sock = await anyio.connect_tcp(*addr, **connect_kw)
+        await self.start_client(
+            sock, addr, path=path, headers=headers, subprotocols=subprotocols)
 
+    async def start_client(self,
+                           sock: anyio.abc.SocketStream,
+                           addr,
+                           path: str,
+                           headers: Optional[List] = None,
+                           subprotocols: Optional[List[str]] = None):
+        """Start a client WS connection on this socket.
+
+        Returns: the AcceptConnection message.
+        """
+        self._sock = sock
         self._connection = WSConnection(ConnectionType.CLIENT)
         if headers is None:
             headers = []
-        data = self._connection.send(Request(host=addr[0], target=path, extra_headers=headers))
+        if subprotocols is None:
+            subprotocols = []
+        data = self._connection.send(
+            Request(
+                host=addr[0],
+                target=path,
+                extra_headers=headers,
+                subprotocols=subprotocols))
         await self._sock.send_all(data)
 
         assert self._scope is None
@@ -32,10 +68,47 @@ class Websocket:
         try:
             event = await self._next_event()
             if not isinstance(event, AcceptConnection):
-                raise ConnectionError("Failed to establish a connection", event)
+                raise ConnectionError("Failed to establish a connection",
+                                      event)
+            return event
         finally:
             self._scope = None
 
+    async def start_server(self, sock: anyio.abc.SocketStream, filter=None):  # pylint: disable=W0622
+        """Start a server WS connection on this socket.
+
+        Filter: an async callable that gets passed the initial Request.
+        It may return an AcceptConnection message, a bool, or a string (the
+        subprotocol to use).
+        Returns: the Request message.
+        """
+        assert self._scope is None
+        self._scope = True
+        self._sock = sock
+        self._connection = WSConnection(ConnectionType.SERVER)
+
+        try:
+            event = await self._next_event()
+            if not isinstance(event, Request):
+                raise ConnectionError("Failed to establish a connection",
+                                      event)
+            msg = None
+            if filter is not None:
+                msg = await filter(Request)
+                if not msg:
+                    msg = RejectConnection()
+                elif msg is True:
+                    msg = None
+                elif isinstance(msg, str):
+                    msg = AcceptConnection(subprotocol=msg)
+            if not msg:
+                msg = AcceptConnection(subprotocol=event.subprotocols[0])
+            data = self._connection.send(msg)
+            await self._sock.send_all(data)
+            if not isinstance(msg, AcceptConnection):
+                raise ConnectionError("Not accepted", msg)
+        finally:
+            self._scope = None
 
     async def _next_event(self):
         """
@@ -47,9 +120,8 @@ class Websocket:
                     # check if we need to buffer
                     if event.message_finished:
                         return self._wrap_data(self._gather_buffers(event))
-                    else:
-                        self._buffer(event)
-                        break  # exit for loop
+                    self._buffer(event)
+                    break  # exit for loop
                 else:
                     return event
 
@@ -81,8 +153,9 @@ class Websocket:
         """
         Sends some data down the connection.
         """
-        self._connection.send_data(payload=data, final=True)
-        data = self._connection.bytes_to_send()
+        MsgType = TextMessage if isinstance(data, str) else BytesMessage
+        data = MsgType(data=data, message_finished=final)
+        data = self._connection.send(event=data)
         await self._sock.send_all(data)
 
     def _buffer(self, event: Message):
@@ -111,19 +184,19 @@ class Websocket:
         buf.truncate()
         return data
 
-    def _wrap_data(self, data: Union[str, bytes]):
+    @staticmethod
+    def _wrap_data(data: Union[str, bytes]):
         """
         Wraps data into the right event.
         """
-        if isinstance(data, str):
-            return TextMessage(data=data, frame_finished=True, message_finished=True)
-        elif isinstance(data, bytes):
-            return BytesMessage(data=data, frame_finished=True, message_finished=True)
+        MsgType = TextMessage if isinstance(data, str) else BytesMessage
+        return MsgType(data=data, frame_finished=True, message_finished=True)
 
     async def __aiter__(self):
         async with anyio.open_cancel_scope() as scope:
             if self._scope is not None:
-                raise RuntimeError("Only one task may iterate on this web socket")
+                raise RuntimeError(
+                    "Only one task may iterate on this web socket")
             self._scope = scope
             try:
                 while True:
@@ -133,4 +206,3 @@ class Websocket:
                     yield msg
             finally:
                 self._scope = None
-

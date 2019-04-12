@@ -1,0 +1,7 @@
+# RTD is currently installing 1.5.3, which has a bug in :lineno-match:
+sphinx >= 1.7.0
+sphinx_rtd_theme
+sphinxcontrib-trio
+sphinx_py3doc_enhanced_theme
+sphinx_autodoc_typehints
+anyio
