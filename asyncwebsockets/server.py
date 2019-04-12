@@ -1,6 +1,7 @@
 """
 Client connection utilities.
 """
+
 from asyncwebsockets.websocket import Websocket
 
 try:
@@ -10,7 +11,7 @@ except ImportError:
 
 
 @acontextmanager
-async def open_websocket_server(sock, filter=None):  # noqa: W0622
+async def open_websocket_server(sock, filter=None):  # pylint: disable=W0622
     """
     A context manager which serves this websocket.
 
@@ -24,7 +25,7 @@ async def open_websocket_server(sock, filter=None):  # noqa: W0622
         await ws.close()
 
 
-async def create_websocket_server(sock, filter=None):  # noqa: W0622
+async def create_websocket_server(sock, filter=None):  # pylint: disable=W0622
     """
     A more low-level form of open_websocket_server.
     You are responsible for closing this websocket.

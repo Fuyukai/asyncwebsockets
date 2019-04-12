@@ -1,6 +1,8 @@
 """
 Base class for all websockets.
 """
+# pylint: disable=R0913
+
 from io import BytesIO, StringIO
 from typing import List, Optional, Union
 
@@ -72,8 +74,7 @@ class Websocket:
         finally:
             self._scope = None
 
-    async def start_server(self, sock: anyio.abc.SocketStream,
-                           filter=None):  # noqa: W0622
+    async def start_server(self, sock: anyio.abc.SocketStream, filter=None):  # pylint: disable=W0622
         """Start a server WS connection on this socket.
 
         Filter: an async callable that gets passed the initial Request.
