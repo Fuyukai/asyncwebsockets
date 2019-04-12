@@ -2,7 +2,6 @@ from wsproto.events import BytesMessage, TextMessage, Message
 
 import trio
 import pytest
-from asyncwebsockets import Websocket
 from asyncwebsockets.client import open_websocket
 from asyncwebsockets.client import create_websocket_client
 from asyncwebsockets.server import open_websocket_server
@@ -26,10 +25,11 @@ async def test_echo():
 @pytest.mark.trio
 async def test_local_echo():
     async with trio.open_nursery() as n:
+
         async def serve_one(s):
             async with open_websocket_server(s) as w:
                 async for m in w:
-                    if isinstance(m,Message):
+                    if isinstance(m, Message):
                         await w.send(m.data)
                     else:
                         break
@@ -44,7 +44,8 @@ async def test_local_echo():
         listeners = await n.start(serve)
         conn = await trio.testing.open_stream_to_socket_listener(listeners[0])
 
-        sock = await create_websocket_client(conn, "localhost", "/", subprotocols=["echo"])
+        sock = await create_websocket_client(
+            conn, "localhost", "/", subprotocols=["echo"])
         await sock.send(b"test")
         rcvd = 0
         async for message in sock:
@@ -72,5 +73,3 @@ async def test_secure_echo():
                 rcvd += 1
                 await sock.close(code=1000, reason="Thank you!")
         assert rcvd == 1
-
-
