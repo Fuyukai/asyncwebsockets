@@ -3,6 +3,7 @@ include tox.ini
 include rtd-requirements.txt
 include Makefile
 include .readthedocs.yml
+include .pylintrc
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
