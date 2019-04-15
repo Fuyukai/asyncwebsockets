@@ -94,7 +94,7 @@ class Websocket:
                                       event)
             msg = None
             if filter is not None:
-                msg = await filter(Request)
+                msg = await filter(event)
                 if not msg:
                     msg = RejectConnection()
                 elif msg is True:
