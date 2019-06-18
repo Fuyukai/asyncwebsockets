@@ -7,6 +7,7 @@ Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9),
   python3-pytest,
   python3-pytest-runner,
   python3-setuptools-scm,
+  python3-pytest-trio,
 Standards-Version: 3.9.6
 Homepage: https://github.com/Fuyukai/asyncwebsockets
 
