@@ -8,12 +8,14 @@ Build-Depends: dh-python, python3-setuptools, python3-all, debhelper (>= 9),
   python3-pytest-runner,
   python3-setuptools-scm,
   python3-pytest-trio,
+  python3-anyio,
 Standards-Version: 3.9.6
 Homepage: https://github.com/Fuyukai/asyncwebsockets
 
 Package: python3-asyncwebsockets
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends},
+  python3-anyio,
   python3-wsproto (>= 0.13),
 Description: A websocket library
  asyncwebsockets is a curio + trio + asyncio compatible websocket client library.
