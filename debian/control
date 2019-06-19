@@ -15,5 +15,6 @@ Package: python3-asyncwebsockets
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends},
   python3-wsproto (>= 0.13),
+Recommends: python3-trio,
 Description: A websocket library
  asyncwebsockets is a curio + trio + asyncio compatible websocket client library.
