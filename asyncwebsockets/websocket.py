@@ -102,7 +102,8 @@ class Websocket:
                 elif isinstance(msg, str):
                     msg = AcceptConnection(subprotocol=msg)
             if not msg:
-                msg = AcceptConnection(subprotocol=event.subprotocols[0])
+                subprotocol = event.subprotocols[0] if event.subprotocols else None
+                msg = AcceptConnection(subprotocol=subprotocol)
             data = self._connection.send(msg)
             await self._sock.send_all(data)
             if not isinstance(msg, AcceptConnection):
