@@ -29,22 +29,20 @@ class Websocket:
         self._string_buffer = StringIO()
         self._closed = False
 
-    async def __ainit__(self,
-                        addr,
-                        path: str,
-                        headers: Optional[List] = None,
-                        subprotocols=None,
-                        **connect_kw):
+    async def __ainit__(
+        self, addr, path: str, headers: Optional[List] = None, subprotocols=None, **connect_kw
+    ):
         sock = await anyio.connect_tcp(*addr, **connect_kw)
-        await self.start_client(
-            sock, addr, path=path, headers=headers, subprotocols=subprotocols)
+        await self.start_client(sock, addr, path=path, headers=headers, subprotocols=subprotocols)
 
-    async def start_client(self,
-                           sock: anyio.abc.SocketStream,
-                           addr,
-                           path: str,
-                           headers: Optional[List] = None,
-                           subprotocols: Optional[List[str]] = None):
+    async def start_client(
+        self,
+        sock: anyio.abc.SocketStream,
+        addr,
+        path: str,
+        headers: Optional[List] = None,
+        subprotocols: Optional[List[str]] = None,
+    ):
         """Start a client WS connection on this socket.
 
         Returns: the AcceptConnection message.
@@ -56,11 +54,8 @@ class Websocket:
         if subprotocols is None:
             subprotocols = []
         data = self._connection.send(
-            Request(
-                host=addr[0],
-                target=path,
-                extra_headers=headers,
-                subprotocols=subprotocols))
+            Request(host=addr[0], target=path, extra_headers=headers, subprotocols=subprotocols)
+        )
         try:
             await self._sock.send_all(data)
         except AttributeError:
@@ -71,13 +66,14 @@ class Websocket:
         try:
             event = await self._next_event()
             if not isinstance(event, AcceptConnection):
-                raise ConnectionError("Failed to establish a connection",
-                                      event)
+                raise ConnectionError("Failed to establish a connection", event)
             return event
         finally:
             self._scope = None
 
-    async def start_server(self, sock: anyio.abc.SocketStream, filter=None):  # pylint: disable=W0622
+    async def start_server(
+        self, sock: anyio.abc.SocketStream, filter=None
+    ):  # pylint: disable=W0622
         """Start a server WS connection on this socket.
 
         Filter: an async callable that gets passed the initial Request.
@@ -93,8 +89,7 @@ class Websocket:
         try:
             event = await self._next_event()
             if not isinstance(event, Request):
-                raise ConnectionError("Failed to establish a connection",
-                                      event)
+                raise ConnectionError("Failed to establish a connection", event)
             msg = None
             if filter is not None:
                 msg = await filter(event)
@@ -213,8 +208,7 @@ class Websocket:
     async def __aiter__(self):
         async with anyio.open_cancel_scope() as scope:
             if self._scope is not None:
-                raise RuntimeError(
-                    "Only one task may iterate on this web socket")
+                raise RuntimeError("Only one task may iterate on this web socket")
             self._scope = scope
             try:
                 while True:

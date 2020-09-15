@@ -44,8 +44,7 @@ async def test_local_echo():
         listeners = await n.start(serve)
         conn = await trio.testing.open_stream_to_socket_listener(listeners[0])
 
-        sock = await create_websocket_client(
-            conn, "localhost", "/", subprotocols=["echo"])
+        sock = await create_websocket_client(conn, "localhost", "/", subprotocols=["echo"])
         await sock.send(b"test")
         rcvd = 0
         async for message in sock:

@@ -8,7 +8,11 @@ from asyncwebsockets.client import create_websocket_client, open_websocket_clien
 from asyncwebsockets.server import create_websocket_server, open_websocket_server
 
 __all__ = [
-    "open_websocket", "create_websocket", "create_websocket_server",
-    "open_websocket_server", "create_websocket_client",
-    "open_websocket_client", "Websocket"
+    "open_websocket",
+    "create_websocket",
+    "create_websocket_server",
+    "open_websocket_server",
+    "create_websocket_client",
+    "open_websocket_client",
+    "Websocket",
 ]
