@@ -61,7 +61,10 @@ class Websocket:
                 target=path,
                 extra_headers=headers,
                 subprotocols=subprotocols))
-        await self._sock.send_all(data)
+        try:
+            await self._sock.send_all(data)
+        except AttributeError:
+            await self._sock.send(data)
 
         assert self._scope is None
         self._scope = True
@@ -104,7 +107,10 @@ class Websocket:
             if not msg:
                 msg = AcceptConnection(subprotocol=event.subprotocols[0])
             data = self._connection.send(msg)
-            await self._sock.send_all(data)
+            try:
+                await self._sock.send_all(data)
+            except AttributeError:
+                await self._sock.send(data)
             if not isinstance(msg, AcceptConnection):
                 raise ConnectionError("Not accepted", msg)
         finally:
@@ -125,7 +131,10 @@ class Websocket:
                 else:
                     return event
 
-            data = await self._sock.receive_some(4096)
+            try:
+                data = await self._sock.receive_some(4096)
+            except AttributeError:
+                data = await self._sock.receive(4096)
             if not data:
                 return CloseConnection(code=500, reason="Socket closed")
             self._connection.receive_data(data)
@@ -144,10 +153,16 @@ class Websocket:
             # cancel any outstanding listeners
 
         data = self._connection.send(CloseConnection(code=code, reason=reason))
-        await self._sock.send_all(data)
+        try:
+            await self._sock.send_all(data)
+        except AttributeError:
+            await self._sock.send(data)
 
         # No, we don't wait for the correct reply
-        await self._sock.close()
+        try:
+            await self._sock.close()
+        except AttributeError:
+            await self._sock.aclose()
 
     async def send(self, data: Union[bytes, str], final: bool = True):
         """
@@ -156,7 +171,10 @@ class Websocket:
         MsgType = TextMessage if isinstance(data, str) else BytesMessage
         data = MsgType(data=data, message_finished=final)
         data = self._connection.send(event=data)
-        await self._sock.send_all(data)
+        try:
+            await self._sock.send_all(data)
+        except AttributeError:
+            await self._sock.send(data)
 
     def _buffer(self, event: Message):
         """
