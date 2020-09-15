@@ -123,8 +123,7 @@ class Websocket:
                         return self._wrap_data(self._gather_buffers(event))
                     self._buffer(event)
                     break  # exit for loop
-                else:
-                    return event
+                return event
 
             try:
                 data = await self._sock.receive_some(4096)
