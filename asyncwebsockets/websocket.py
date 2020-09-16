@@ -20,18 +20,17 @@ from wsproto.events import (
 
 
 class Websocket:
-    _scope = None
     _sock = None
     _connection = None
 
     def __init__(self):
         self._byte_buffer = BytesIO()
         self._string_buffer = StringIO()
-        self._closed = False
 
     async def __ainit__(
         self, addr, path: str, headers: Optional[List] = None, subprotocols=None, **connect_kw
     ):
+        connect_kw.pop("autostart_tls", None)
         sock = await anyio.connect_tcp(*addr, **connect_kw)
         await self.start_client(sock, addr, path=path, headers=headers, subprotocols=subprotocols)
 
@@ -47,6 +46,7 @@ class Websocket:
 
         Returns: the AcceptConnection message.
         """
+        assert self._sock is None
         self._sock = sock
         self._connection = WSConnection(ConnectionType.CLIENT)
         if headers is None:
@@ -61,15 +61,10 @@ class Websocket:
         except AttributeError:
             await self._sock.send(data)
 
-        assert self._scope is None
-        self._scope = True
-        try:
-            event = await self._next_event()
-            if not isinstance(event, AcceptConnection):
-                raise ConnectionError("Failed to establish a connection", event)
-            return event
-        finally:
-            self._scope = None
+        event = await self._next_event()
+        if not isinstance(event, AcceptConnection):
+            raise ConnectionError("Failed to establish a connection", event)
+        return event
 
     async def start_server(
         self, sock: anyio.abc.SocketStream, filter=None
@@ -81,35 +76,31 @@ class Websocket:
         subprotocol to use).
         Returns: the Request message.
         """
-        assert self._scope is None
-        self._scope = True
+        assert self._sock is None
         self._sock = sock
         self._connection = WSConnection(ConnectionType.SERVER)
 
-        try:
-            event = await self._next_event()
-            if not isinstance(event, Request):
-                raise ConnectionError("Failed to establish a connection", event)
-            msg = None
-            if filter is not None:
-                msg = await filter(event)
-                if not msg:
-                    msg = RejectConnection()
-                elif msg is True:
-                    msg = None
-                elif isinstance(msg, str):
-                    msg = AcceptConnection(subprotocol=msg)
+        event = await self._next_event()
+        if not isinstance(event, Request):
+            raise ConnectionError("Failed to establish a connection", event)
+        msg = None
+        if filter is not None:
+            msg = await filter(event)
             if not msg:
-                msg = AcceptConnection(subprotocol=event.subprotocols[0])
-            data = self._connection.send(msg)
-            try:
-                await self._sock.send_all(data)
-            except AttributeError:
-                await self._sock.send(data)
-            if not isinstance(msg, AcceptConnection):
-                raise ConnectionError("Not accepted", msg)
-        finally:
-            self._scope = None
+                msg = RejectConnection()
+            elif msg is True:
+                msg = None
+            elif isinstance(msg, str):
+                msg = AcceptConnection(subprotocol=msg)
+        if not msg:
+            msg = AcceptConnection(subprotocol=event.subprotocols[0])
+        data = self._connection.send(msg)
+        try:
+            await self._sock.send_all(data)
+        except AttributeError:
+            await self._sock.send(data)
+        if not isinstance(msg, AcceptConnection):
+            raise ConnectionError("Not accepted", msg)
 
     async def _next_event(self):
         """
@@ -125,6 +116,8 @@ class Websocket:
                     break  # exit for loop
                 return event
 
+            if self._sock is None:
+                return CloseConnection(code=500, reason="Socket closed")
             try:
                 data = await self._sock.receive_some(4096)
             except AttributeError:
@@ -137,26 +130,21 @@ class Websocket:
         """
         Closes the websocket.
         """
-        if self._closed:
+        sock, self._sock = self._sock, None
+        if not sock:
             return
-
-        self._closed = True
-
-        if self._scope is not None:
-            await self._scope.cancel()
-            # cancel any outstanding listeners
 
         data = self._connection.send(CloseConnection(code=code, reason=reason))
         try:
-            await self._sock.send_all(data)
+            await sock.send_all(data)
         except AttributeError:
-            await self._sock.send(data)
+            await sock.send(data)
 
         # No, we don't wait for the correct reply
         try:
-            await self._sock.close()
+            await sock.close()
         except AttributeError:
-            await self._sock.aclose()
+            await sock.aclose()
 
     async def send(self, data: Union[bytes, str], final: bool = True):
         """
@@ -205,15 +193,8 @@ class Websocket:
         return MsgType(data=data, frame_finished=True, message_finished=True)
 
     async def __aiter__(self):
-        async with anyio.open_cancel_scope() as scope:
-            if self._scope is not None:
-                raise RuntimeError("Only one task may iterate on this web socket")
-            self._scope = scope
-            try:
-                while True:
-                    msg = await self._next_event()
-                    if isinstance(msg, CloseConnection):
-                        return
-                    yield msg
-            finally:
-                self._scope = None
+        while True:
+            msg = await self._next_event()
+            if isinstance(msg, CloseConnection):
+                return
+            yield msg
