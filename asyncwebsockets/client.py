@@ -94,10 +94,3 @@ async def create_websocket_client(
     await ws.start_client(sock, addr=addr, path=path, headers=headers, subprotocols=subprotocols)
     return ws
 
-
-try:
-    import curio.meta
-
-    curio.meta.safe_generator(open_websocket.__wrapped__)
-except ImportError:
-    pass

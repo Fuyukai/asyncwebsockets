@@ -34,10 +34,3 @@ async def create_websocket_server(sock, filter=None):  # pylint: disable=W0622
     await ws.start_server(sock, filter=filter)
     return ws
 
-
-try:
-    import curio.meta
-
-    curio.meta.safe_generator(open_websocket_server.__wrapped__)
-except ImportError:
-    pass
