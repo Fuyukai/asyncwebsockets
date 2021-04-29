@@ -7,6 +7,7 @@ from io import BytesIO, StringIO
 from typing import List, Optional, Union
 
 import anyio
+from anyio.abc import SocketAttribute
 from wsproto import ConnectionType, WSConnection
 from wsproto.events import (
     AcceptConnection,
@@ -33,6 +34,10 @@ class Websocket:
         connect_kw.pop("autostart_tls", None)
         sock = await anyio.connect_tcp(*addr, **connect_kw)
         await self.start_client(sock, addr, path=path, headers=headers, subprotocols=subprotocols)
+
+    @property
+    def raw_socket(self):
+        return self._sock.extra(SocketAttribute.raw_socket)
 
     async def start_client(
         self,
