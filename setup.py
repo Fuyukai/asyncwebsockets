@@ -18,7 +18,7 @@ setup(
     long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),
     setup_requires=["setuptools_scm", "pytest-runner"],
     tests_require=["pytest-trio"],
-    install_requires=["anyio>=2.0", "wsproto>=1.0", "async_generator", "yarl"],
+    install_requires=["anyio>=3.0", "wsproto>=1.0", "async_generator", "yarl"],
     extras_require={},
     python_requires=">=3.6",
     classifiers=[
