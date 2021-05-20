@@ -33,4 +33,3 @@ async def create_websocket_server(sock, filter=None):  # pylint: disable=W0622
     ws = Websocket()
     await ws.start_server(sock, filter=filter)
     return ws
-

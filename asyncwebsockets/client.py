@@ -93,4 +93,3 @@ async def create_websocket_client(
     ws = Websocket()
     await ws.start_client(sock, addr=addr, path=path, headers=headers, subprotocols=subprotocols)
     return ws
-
