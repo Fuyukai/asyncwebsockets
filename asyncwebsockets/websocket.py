@@ -18,6 +18,7 @@ from wsproto.events import (
     Request,
     TextMessage,
 )
+from wsproto.utilities import LocalProtocolError
 
 
 class Websocket:
@@ -141,11 +142,16 @@ class Websocket:
         if not sock:
             return
 
-        data = self._connection.send(CloseConnection(code=code, reason=reason))
         try:
-            await sock.send_all(data)
-        except AttributeError:
-            await sock.send(data)
+            data = self._connection.send(CloseConnection(code=code, reason=reason))
+        except LocalProtocolError:
+            # not yet fully open
+            pass
+        else:
+            try:
+                await sock.send_all(data)
+            except AttributeError:
+                await sock.send(data)
 
         # No, we don't wait for the correct reply
         try:
