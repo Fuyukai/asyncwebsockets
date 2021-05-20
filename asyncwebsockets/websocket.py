@@ -27,6 +27,7 @@ class Websocket:
     def __init__(self):
         self._byte_buffer = BytesIO()
         self._string_buffer = StringIO()
+        self._send_lock = anyio.Lock()
 
     async def __ainit__(
         self, addr, path: str, headers: Optional[List] = None, subprotocols=None, **connect_kw
@@ -158,11 +159,12 @@ class Websocket:
         """
         MsgType = TextMessage if isinstance(data, str) else BytesMessage
         data = MsgType(data=data, message_finished=final)
-        data = self._connection.send(event=data)
-        try:
-            await self._sock.send_all(data)
-        except AttributeError:
-            await self._sock.send(data)
+        async with self._send_lock:
+            data = self._connection.send(event=data)
+            try:
+                await self._sock.send_all(data)
+            except AttributeError:
+                await self._sock.send(data)
 
     def _buffer(self, event: Message):
         """
