@@ -1,13 +1,13 @@
 from wsproto.events import BytesMessage, TextMessage, Message
 
-import trio
+import anyio
 import pytest
 from asyncwebsockets.client import open_websocket
 from asyncwebsockets.client import create_websocket_client
 from asyncwebsockets.server import open_websocket_server
 
 
-@pytest.mark.trio
+@pytest.mark.anyio
 async def test_echo():
     async with open_websocket("ws://echo.websocket.org") as sock:  # pylint: disable=E1701
         await sock.send(b"test")
@@ -22,9 +22,9 @@ async def test_echo():
         assert rcvd == 1
 
 
-@pytest.mark.trio
+@pytest.mark.anyio
 async def test_local_echo():
-    async with trio.open_nursery() as n:
+    async with anyio.create_task_group() as n:
 
         async def serve_one(s):
             async with open_websocket_server(s) as w:  # pylint: disable=E1701
@@ -34,15 +34,14 @@ async def test_local_echo():
                     else:
                         break
 
-        async def serve(task_status=trio.TASK_STATUS_IGNORED):
-            listeners = await trio.open_tcp_listeners(0)
+        async def serve(*, task_status):
+            listeners = await anyio.create_tcp_listener(local_port=0)
             task_status.started(listeners)
-            while True:
-                s = await listeners[0].accept()
-                n.start_soon(serve_one, s)
+            await listeners.serve(serve_one)
 
         listeners = await n.start(serve)
-        conn = await trio.testing.open_stream_to_socket_listener(listeners[0])
+        addr = listeners.extra(anyio.abc.SocketAttribute.local_address)
+        conn = await anyio.connect_tcp(*addr)
 
         sock = await create_websocket_client(conn, "localhost", "/", subprotocols=["echo"])
         await sock.send(b"test")
@@ -59,7 +58,7 @@ async def test_local_echo():
         await sock.close()
 
 
-@pytest.mark.trio
+@pytest.mark.anyio
 async def test_secure_echo():
     async with open_websocket("wss://echo.websocket.org") as sock:  # pylint: disable=E1701
         await sock.send("test")
