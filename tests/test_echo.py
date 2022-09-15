@@ -9,7 +9,7 @@ from asyncwebsockets.server import open_websocket_server
 
 @pytest.mark.anyio
 async def test_echo():
-    async with open_websocket("ws://echo.websocket.org") as sock:  # pylint: disable=E1701
+    async with open_websocket("ws://ws.ifelse.io") as sock:  # pylint: disable=E1701
         await sock.send(b"test")
         rcvd = 0
         async for message in sock:
@@ -60,14 +60,15 @@ async def test_local_echo():
 
 @pytest.mark.anyio
 async def test_secure_echo():
-    async with open_websocket("wss://echo.websocket.org") as sock:  # pylint: disable=E1701
+    async with open_websocket("wss://ws.ifelse.io") as sock:  # pylint: disable=E1701
         await sock.send("test")
         rcvd = 0
         async for message in sock:
             print("Event received", message)
 
             if isinstance(message, TextMessage):
-                assert message.data == "test"
-                rcvd += 1
-                await sock.close(code=1000, reason="Thank you!")
+                # the thing may send a greeting
+                if message.data == "test":
+                    rcvd += 1
+                    await sock.close(code=1000, reason="Thank you!")
         assert rcvd == 1
