@@ -139,7 +139,8 @@ class Websocket:
             # not yet fully open
             pass
         else:
-            await sock.send(data)
+            async with self._send_lock:
+                await sock.send(data)
 
         # No, we don't wait for the correct reply
         await sock.aclose()
