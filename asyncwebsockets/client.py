@@ -9,14 +9,9 @@ import anyio
 import yarl
 
 from asyncwebsockets.websocket import Websocket
+from contextlib import asynccontextmanager
 
-try:
-    from contextlib import acontextmanager
-except ImportError:
-    from async_generator import asynccontextmanager as acontextmanager
-
-
-@acontextmanager
+@asynccontextmanager
 async def open_websocket(
     url: str, headers: Optional[list] = None, subprotocols: Optional[list] = None
 ):
@@ -61,7 +56,7 @@ async def create_websocket(
     return ws
 
 
-@acontextmanager
+@asynccontextmanager
 async def open_websocket_client(
     sock: anyio.abc.SocketStream,
     addr,

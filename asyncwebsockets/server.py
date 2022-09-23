@@ -3,14 +3,9 @@ Client connection utilities.
 """
 
 from asyncwebsockets.websocket import Websocket
+from contextlib import asynccontextmanager
 
-try:
-    from contextlib import acontextmanager
-except ImportError:
-    from async_generator import asynccontextmanager as acontextmanager
-
-
-@acontextmanager
+@asynccontextmanager
 async def open_websocket_server(sock, filter=None):  # pylint: disable=W0622
     """
     A context manager which serves this websocket.
